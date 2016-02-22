@@ -5,33 +5,27 @@ var _ = require('underscore');
 
 var results = [];
 
-// request('http://www.pbs.org/wgbh/pages/frontline/view/', function (error, response, html) {
-// 	if (!error && response.statusCode == 200) {
-		
-// 		// console.log(html);
-// 		var $ = cheerio.load(html);
-		
-// 		// var domain = 'http://www.pbs.org'
-
-// 	// ***********
-// 	} // close IF
-// }); // close request
-// 	// ***********
-
-
 fs.readFile('index.html', 'utf8', function(err, data){
 	if (!err) {
 
 		var $ = cheerio.load(data);
 
+		var howmanyhits = $('a.list__item').get().length
+		console.log("howmanyhits: ", howmanyhits);
+		var testcase = $('a.list__item').first();
+		var testcase = $('a.list__item').get(0);
+		console.log("typeof testcase: ", typeof testcase);
+		console.log("testcase: ", testcase);
+
 		$('a.list__item').each(function(i, el){
 			tempObj = {}
 			tempObj.dex = i;
 
-			// results[i] = el
-			tempObj.href = el.attribs.href;
-			tempObj.img = el.children[1].children[1].children[1].attribs.src;
-			tempObj.huh = el.children[1].children[3].children[0]; 
+			// results[i] = $(this).eq(0);
+			tempObj.href = $(this).attribs.href;
+			tempObj.href = $(this)[0].attribs.href;
+			tempObj.img = $(this)[0].children[1].children[1].children[1].attribs.src;
+			tempObj.huh = $(this)[0].children[1].children[3].children[0].text(); 
 			
 			results[i] = tempObj
 		});
