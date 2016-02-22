@@ -9,12 +9,13 @@ var url = 'mongodb://localhost:27017/test';
 
 var results = [];
 
-var insertDocument = function(db, array, callback) {
-	db.collection('seed_2_tests').insertMany( 
-		array,
+var insertDocument = function(db, ref, doc, callback) {
+	db.collection('seed_2_tests').replaceOne( 
+		{ href: ref },
+		doc,
 		function(err, result) {
 			assert.equal(err, null);
-			console.log("Inserted documents: ", results);
+			// console.log("Inserted documents: ", results);
 			callback();
 		}
 	);
@@ -22,7 +23,7 @@ var insertDocument = function(db, array, callback) {
 
 var scrape_promise = new Promise(function(resolve, reject){
 
-	fs.readFile('index.html', 'utf8', function(err, data){
+	fs.readFile('index2.html', 'utf8', function(err, data){
 		if(err){ 
 			reject(err) 
 		} else {
@@ -53,7 +54,7 @@ var scrape_promise = new Promise(function(resolve, reject){
 
 scrape_promise.then(function(complete_results){
 
-	// console.log("complete_results: ", complete_results)
+	console.log("complete_results: ", complete_results)
 	
 	MongoClient.connect(url, function(err, db) {
 		assert.equal(null, err);
