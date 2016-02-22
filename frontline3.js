@@ -12,20 +12,15 @@ fs.readFile('index.html', 'utf8', function(err, data){
 
 		var howmanyhits = $('a.list__item').get().length
 		console.log("howmanyhits: ", howmanyhits);
-		var testcase = $('a.list__item').first();
-		var testcase = $('a.list__item').get(0);
-		console.log("typeof testcase: ", typeof testcase);
-		console.log("testcase: ", testcase);
 
 		$('a.list__item').each(function(i, el){
 			tempObj = {}
 			tempObj.dex = i;
 
-			// results[i] = $(this).eq(0);
-			tempObj.href = $(this).attribs.href;
+			tempObj.title = $(this).find($('.list__copy.list-hed')).text();
+			tempObj.date = $(this).find($('.list__copy.small-caps-copy')).text();
 			tempObj.href = $(this)[0].attribs.href;
-			tempObj.img = $(this)[0].children[1].children[1].children[1].attribs.src;
-			tempObj.huh = $(this)[0].children[1].children[3].children[0].text(); 
+			tempObj.img = $(this).find($('.list__img')).children().attr('src')
 			
 			results[i] = tempObj
 		});
