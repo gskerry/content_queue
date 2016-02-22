@@ -5,35 +5,43 @@ var _ = require('underscore');
 
 var results = [];
 
-fs.readFile('index.html', 'utf8', function(err, data){
-	if (!err) {
+var scrape_promise = new Promise(function(resolve, reject){
 
-		var $ = cheerio.load(data);
+	fs.readFile('index.html', 'utf8', function(err, data){
+		if(err){ 
+			reject(err) 
+		} else {
 
-		var howmanyhits = $('a.list__item').get().length
-		console.log("howmanyhits: ", howmanyhits);
+			var $ = cheerio.load(data);
 
-		$('a.list__item').each(function(i, el){
-			tempObj = {}
-			tempObj.dex = i;
+			var howmanyhits = $('a.list__item').get().length
+			console.log("howmanyhits: ", howmanyhits);
 
-			tempObj.title = $(this).find($('.list__copy.list-hed')).text();
-			tempObj.date = $(this).find($('.list__copy.small-caps-copy')).text();
-			tempObj.href = $(this)[0].attribs.href;
-			tempObj.img = $(this).find($('.list__img')).children().attr('src')
-			
-			results[i] = tempObj
-		});
+			$('a.list__item').each(function(i, el){
+				tempObj = {}
+				tempObj.dex = i;
+				
+				tempObj.title = $(this).find($('.list__copy.list-hed')).text();
+				tempObj.date = $(this).find($('.list__copy.small-caps-copy')).text();
+				tempObj.href = $(this)[0].attribs.href;
+				tempObj.img = $(this).find($('.list__img')).children().attr('src')
 
-		console.log("results: ",results[0])
-		
-		
-	} // close IF
-}); // close read
+				results[i] = tempObj
+			});
+			resolve(results);
+			// console.log("results: ",results[0])
 
-var list = function () {
+		} // close IF
+	}); // close read
+
+});
+
+scrape_promise.then(function(complete_results){
+	console.log("complete_results: ", complete_results)
+})
+
+/*var list = function () {
   return _.clone(results);
 };
 
-module.exports = { list: list };
-
+module.exports = { list: list };*/
