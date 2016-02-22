@@ -89,7 +89,7 @@ var upsert_promise = function(db, ref, doc) {
 var scrape_promise_too = function(file){
 	return new Promise(function(resolve, reject){
 
-		fs.readFile(datepath+'/html/'+file, 'utf8', function(err, data){
+		fs.readFile('scrapes/'+datepath+'/html/'+file, 'utf8', function(err, data){
 			if(err){ 
 				reject(err) 
 			} else {
@@ -134,7 +134,7 @@ casper_promise()
 
 		console.log("casper promise gives : ",result)
 
-		var files = fs.readdirSync(datepath+'/html')
+		var files = fs.readdirSync('scrapes/'+datepath+'/html')
 		console.log(files);
 
 		var outer_promise_ray = files.map(scrape_promise_too);

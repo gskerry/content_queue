@@ -25,14 +25,14 @@ casper.then(function(){
         var page = that.getCurrentUrl()        
         // console.log('page:', page);
 
-        that.capture(mydate+'/images/frontline-'+ i +'.png', {
+        that.capture('scrapes/'+mydate+'/images/frontline-'+ i +'.png', {
             top: 0,
             left: 0,
             width: 500,
             height: 400
         });
 
-        that.download(page, mydate+'/html/index-'+i+'.html')
+        that.download(page, 'scrapes/'+mydate+'/html/index-'+i+'.html')
 
         if (that.exists('a.pagination__link.pagination__page.pagination__next')){
             i++;
