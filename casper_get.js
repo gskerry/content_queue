@@ -5,25 +5,23 @@ var casper = require('casper').create({
 });
 var fs = require('fs');
 
-var i = 0;
+var cb = function (){
+    this.echo("I've waited for 2 seconds.");
+}
 
-casper.start('http://www.pbs.org/wgbh/frontline/watch/').repeat(5, function(){
-	
-	this.capture('frontline-'+ i +'.png', {
-        top: 0,
-        left: 0,
-        width: 500,
-        height: 400
-    });
+casper.start('http://www.pbs.org/wgbh/frontline/watch/')
 
-    this.click('a.pagination__link.pagination__page.pagination__next');
+casper.then(function(){
+    this.wait(2000, cb);
+})
 
-    i++;
+var dostuff = function(){
+    var page = this.getCurrentUrl()
+    console.log('page:', page);
+}
 
-});
-
-casper.then(function() {
-	exit()
-});
+casper.then(function(){
+    
+})
 
 casper.run();
