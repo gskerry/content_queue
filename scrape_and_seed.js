@@ -7,8 +7,6 @@ var assert = require('assert');
 var ObjectId = require('mongodb').ObjectID;
 var url = 'mongodb://localhost:27017/test';
 
-var results = [];
-
 var upsertDoc = function(db, ref, doc, callback) {
 	db.collection('seed_2_tests').replaceOne( 
 		{ href: ref },
@@ -16,57 +14,75 @@ var upsertDoc = function(db, ref, doc, callback) {
 		{ upsert: true },
 		function(err, result) {
 			assert.equal(err, null);
-			console.log("Inserted document: ", result);
+			// console.log("Inserted document: ", result);
+			console.log("document Inserted.");
 			callback();
 		}
 	);
 };
 
-MongoClient.connect(url, function(err, db) {
-	assert.equal(null, err);
-	console.log("mongo connected.");
-	var scrape_promise = new Promise(function(resolve, reject){
+var scrape_promise = new Promise(function(resolve, reject){
 
-		fs.readFile('index2.html', 'utf8', function(err, data){
-			if(err){ 
-				reject(err); 
-			} else {
+	fs.readFile('index2.html', 'utf8', function(err, data){
+		if(err){ 
+			reject(err) 
+		} else {
 
-				console.log("reading file...");
-				var $ = cheerio.load(data);
+			var results = [];
 
-				var hits = $('a.list__item').get().length
-				console.log("hits: ", hits);
+			var $ = cheerio.load(data);
 
-				$('a.list__item').each(function(i, el){
-					console.log("entry # : ", i)
-					tempObj = {}
-					tempObj.dex = i;
-					tempObj.title = $(this).find($('.list__copy.list-hed')).text();
-					tempObj.date = $(this).find($('.list__copy.small-caps-copy')).text();
-					tempObj.href = $(this)[0].attribs.href;
-					tempObj.img = $(this).find($('.list__img')).children().attr('src')
-					// console.log("tempObj: ", tempObj)
+			var hits = $('a.list__item').get().length
+			console.log("hits: ", hits);
 
-					console.log("upserting doc... (not really)");
-					upsertDoc(db, tempObj.href, tempObj, function() {
-						console.log("added doc.")
-					});
+			$('a.list__item').each(function(i, el){
+				tempObj = {}
+				tempObj.dex = i;
+				tempObj.title = $(this).find($('.list__copy.list-hed')).text();
+				tempObj.date = $(this).find($('.list__copy.small-caps-copy')).text();
+				tempObj.href = $(this)[0].attribs.href;
+				tempObj.img = $(this).find($('.list__img')).children().attr('src')
 
-				}); // close each
+				results[i] = tempObj
+			});
+			console.log("first promise resolved.")
+			resolve(results);
+			// console.log("results: ",results[0])
 
-				resolve();
-				
-			} // close IF
-		}); // close read
-	}); // close promise
+		} // close IF
+	}); // close read
 
-	scrape_promise.then(function(){
-		console.log("closing db...");
-		// db.close();	
+}); // close promise
+
+scrape_promise
+	.then(function(complete_results){
+
+		// console.log("complete_results: ", complete_results)
+		console.log("complete_results sample: ", complete_results[0])
+		
+		MongoClient.connect(url, function(err, db) {
+			assert.equal(null, err);
+
+			console.log("upsert here. ")
+
+			complete_results.forEach((doc) => {
+				upsertDoc (db, doc.ref, doc, function(){
+					console.log("added doc.")
+				})
+			})
+		});
+
+		// var storeStr = JSON.stringify(complete_results)
+		// fs.	appendFile('frontlines4.json', storeStr, 'utf8', (err) => {
+		// 	if (err) throw err;
+		// 	console.log("data appended to file");
+		// });
+
 	})
-
-});
+	.then(function(){
+		console.log("close db here...")
+		db.close();
+	})
 
 /*var list = function () {
   return _.clone(results);
