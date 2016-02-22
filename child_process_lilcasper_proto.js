@@ -1,13 +1,18 @@
 
+var date = "";
+
 var spawn_promise = function(){
 	return new Promise(function(resolve, reject){
 
 		var spawn = require('child_process').spawn;
 
-		var lilcasper = spawn('casperjs', ['--version'])
+		var lilcasper = spawn('casperjs', ['scrape_traverse.js'])
 
 		lilcasper.stdout.on('data', (data) => {
+		  console.log("typeof data: ",typeof data)
+		  console.log("data: ",data)
 		  console.log(`stdout: ${data}`);
+		  date = data.toString();
 		});
 
 		lilcasper.stderr.on('data', (data) => {
@@ -17,7 +22,7 @@ var spawn_promise = function(){
 
 		lilcasper.on('close', (code) => {
 		  console.log(`child process exited with code ${code}`);
-		  resolve(code);
+		  resolve(date);
 		});
 
 	});
