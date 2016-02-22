@@ -5,23 +5,63 @@ var casper = require('casper').create({
 });
 var fs = require('fs');
 
-var dostuff = function(){
-    var page = this.getCurrentUrl()
-    console.log('page:', page);
-}
+
+var i = 0;
+var d = new Date();
+var yr = d.getFullYear();
+var month = d.getMonth();
+var day = d.getDate();
+var hrs = d.getHours();
+var mins = d.getMinutes();
+
+var mydate = yr+"-"+month+"-"+day+"--"+hrs+mins
+console.log(mydate);
 
 casper.start('http://www.pbs.org/wgbh/frontline/watch/')
 
 casper.then(function(){
     this.wait(2000, function() {
-        this.echo("I've waited for 2 seconds.");
-        if (this.exists('#pbs-modal-overlay'))
-        this.click('#pbs-close-popup');
+        // this.echo("I've waited for 2 seconds.");
+        if (this.exists('#pbs-modal-overlay')){
+            // console.log("PopUp Detected.")
+            this.click('.closeBtn');    
+        }
+        
     });
-})
+}).repeat(5, function(){
+	
+    if (this.exists('#pbs-modal-overlay')){
+            // console.log("PopUp Detected.")
+            this.click('.closeBtn');
+    }
 
-casper.then(function(){
-    dostuff();
-})
+	var page = this.getCurrentUrl()
+	// console.log('page:', page);
+
+	this.capture(mydate+'/images/frontline-'+ i +'.png', {
+        top: 0,
+        left: 0,
+        width: 500,
+        height: 400
+    });
+
+    var code = this.getHTML()
+    // console.log("code: ",code)
+
+	fs.appendFile(mydate+'/index-'+i+'.html', code, function (err) {
+		if (err) this.echo(err);
+		// console.log('yanked!');
+	});
+
+    this.click('a.pagination__link.pagination__page.pagination__next');
+
+    i++;
+
+});
+
+casper.then(function() {
+	// console.log("all done.")
+    exit()
+});
 
 casper.run();
