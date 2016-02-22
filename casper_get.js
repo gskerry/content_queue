@@ -48,10 +48,8 @@ casper.then(function(){
     var code = this.getHTML()
     // console.log("code: ",code)
 
-	fs.appendFile(mydate+'/index-'+i+'.html', code, function (err) {
-		if (err) this.echo(err);
-		// console.log('yanked!');
-	});
+    this.download(page, mydate+'/html/index-'+i+'.html')
+    // this.download(page, 'today/index-'+i+'.html')
 
     this.click('a.pagination__link.pagination__page.pagination__next');
 
