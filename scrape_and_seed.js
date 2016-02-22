@@ -25,7 +25,7 @@ var casper_promise = function(){
 
 		var spawn = require('child_process').spawn;
 
-		var lilcasper = spawn('casperjs', ['scrape_traverse4.js'])
+		var lilcasper = spawn('casperjs', ['casper_get.js'])
 
 		lilcasper.stdout.on('data', (data) => {
 		  console.log("typeof data: ",typeof data)
