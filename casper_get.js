@@ -5,19 +5,21 @@ var casper = require('casper').create({
 });
 var fs = require('fs');
 
-casper.start('http://www.pbs.org/wgbh/frontline/watch/');
+var i = 0;
 
-casper.then(function() {
-    this.click('a.pagination__link.pagination__page.pagination__next');
-});
-
-casper.then(function() {
-    this.capture('frontline.png', {
+casper.start('http://www.pbs.org/wgbh/frontline/watch/').repeat(5, function(){
+	
+	this.capture('frontline-'+ i +'.png', {
         top: 0,
         left: 0,
         width: 500,
         height: 400
     });
+
+    this.click('a.pagination__link.pagination__page.pagination__next');
+
+    i++;
+
 });
 
 casper.then(function() {
