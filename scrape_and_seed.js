@@ -27,6 +27,7 @@ var upsert_promise = function(db, ref, doc) {
 	}) // close promise
 }; // close upsert_promise
 
+
 var scrape_promise = new Promise(function(resolve, reject){
 
 	fs.readFile('index2.html', 'utf8', function(err, data){
@@ -51,20 +52,17 @@ var scrape_promise = new Promise(function(resolve, reject){
 
 				results[i] = tempObj
 			});
-			console.log("first promise resolved.")
+			// console.log("first promise resolved.")
 			resolve(results);
-			// console.log("results: ",results[0])
 
 		} // close IF
 	}); // close read
-
 }); // close promise
 
 
 scrape_promise
 	.then(function(complete_results){
 
-		// console.log("complete_results: ", complete_results)
 		console.log("complete_results sample: ", complete_results[0])
 		
 		MongoClient.connect(url, function(err, db) {
@@ -79,19 +77,13 @@ scrape_promise
 					db.close();
 				}
 			)
+		});
 
+		var storeStr = JSON.stringify(complete_results)
+		
+		fs.	appendFile('frontlines4.json', storeStr, 'utf8', (err) => {
+			if (err) throw err;
+			console.log("data appended to file");
 		});
 
 	})
-	.then(function(){
-		console.log("close db here...")
-		db.close();
-	})
-
-
-/*var list = function () {
-  return _.clone(results);
-};
-
-module.exports = { list: list };*/
-
