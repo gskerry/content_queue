@@ -6,8 +6,7 @@ var morgan = require('morgan')
 var sass = require('node-sass');
 var sassMiddleware = require('node-sass-middleware')
 
-// var mongo_api = require('./frontline3')
-var mongo_api = require('./mongo_API')
+var scrapeject = require('./frontline2')
 
 var app = express();
 
@@ -31,10 +30,6 @@ app.use(express.static(__dirname + '/public'));
 
 app.use( '/', function(req, res){
 	console.log("App active - testing.")
-	var list = mongo_api.list();
+	var list = scrapeject.list();
 	res.render('index',{frontlines: list});
 });
-
-
-
-// change2
