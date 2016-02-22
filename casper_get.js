@@ -19,51 +19,40 @@ console.log(mydate);
 casper.start('http://www.pbs.org/wgbh/frontline/watch/')
 
 casper.then(function(){
-    this.wait(2000, function() {
-        // this.echo("I've waited for 2 seconds.");
-        if (this.exists('#pbs-modal-overlay')){
-            // console.log("PopUp Detected.")
-            this.click('.closeBtn');    
-        }
-        
-    });
-})
-
-casper.then(function(){
-    if (this.exists('a.pagination__link.pagination__page.pagination__next')){
-        i++;
-        this.click('a.pagination__link.pagination__page.pagination__next');
-    }
-})
-
-.repeat(5, function(){
     
-    if (this.exists('#pbs-modal-overlay')){
-            // console.log("PopUp Detected.")
-            this.click('.closeBtn');
+    var recurscrape = function(that){
+        // console.log("that: ", that)
+        var page = that.getCurrentUrl()        
+        // console.log('page:', page);
+
+        that.capture(mydate+'/images/frontline-'+ i +'.png', {
+            top: 0,
+            left: 0,
+            width: 500,
+            height: 400
+        });
+
+        that.download(page, mydate+'/html/index-'+i+'.html')
+
+        if (that.exists('a.pagination__link.pagination__page.pagination__next')){
+            i++;
+            that.click('a.pagination__link.pagination__page.pagination__next')
+            casper.then(function(){
+                // var nextpage = that.getCurrentUrl() 
+                // console.log('nextpage:', nextpage);  
+                return recurscrape(this);
+            })    
+        } else {
+            return "recursive is done."
+        }
+
     }
 
-    var page = this.getCurrentUrl()
-    // console.log('page:', page);
-
-    this.capture(mydate+'/images/frontline-'+ i +'.png', {
-        top: 0,
-        left: 0,
-        width: 500,
-        height: 400
-    });
-
-    var code = this.getHTML()
-
-    this.download(page, mydate+'/html/index-'+i+'.html')
-
-    this.click('a.pagination__link.pagination__page.pagination__next');
-
-    i++;
+    recurscrape(this);
 
 });
 
-casper.then(function() {
+casper.then(function(msg) {
     // console.log("all done.")
     exit()
 });

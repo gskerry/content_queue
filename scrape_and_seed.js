@@ -11,9 +11,8 @@ var MongoClient = require('mongodb').MongoClient;
 var ObjectId = require('mongodb').ObjectID;
 var url = 'mongodb://localhost:27017/test';
 
-// var datepath = "";
-// Hardcode... pending casper sub-process and data transmission
-var datepath = "2016-1-21--2050";
+var datepath = "";
+// var datepath = "2016-1-21--2050";
 
 var outer_ray = [];
 
@@ -24,32 +23,65 @@ var outer_ray = [];
 var casper_promise = function(){
 	return new Promise(function(resolve, reject){
 
-		resolve("done.")
+		var spawn = require('child_process').spawn;
+
+		var lilcasper = spawn('casperjs', ['scrape_traverse4.js'])
+
+		lilcasper.stdout.on('data', (data) => {
+		  console.log("typeof data: ",typeof data)
+		  console.log("data: ",data)
+		  console.log(`stdout: ${data}`);
+		  var parseData = data.toString().split('\n')
+		  datepath = parseData[0];
+		});
+
+		lilcasper.stderr.on('data', (data) => {
+		  console.log(`stderr: ${data}`);
+		  reject(data)
+		});
+
+		lilcasper.on('close', (code) => {
+		  console.log(`child process exited with code ${code}`);
+		  resolve(datepath);
+		});
+
+		// resolve("done.")
 
 	});
 };
 
 var upsert_promise = function(db, ref, doc) {
 	return new Promise(function(resolve, reject){
-		try {
-			db.collection('seed_2_tests').replaceOne( 
-				{ "href" : ref },
-				doc,
-				{ upsert: true },
-				function(err, result) {
-					if(err){
-						reject(err)
-					} else {
-						console.log("resolved. doc inserted.");	
-						resolve(result)	
-					} //close if
-				} // close replace cb
-			); // close mongo.replace
-		}
-		catch (e) {
-			console.log (e)
-		}
 
+		/* 
+		console.log("looking for href: "+ ref+" ...")
+		var cursor = db.collection('seed_2_tests').find({ "href" : ref });
+		
+		cursor.each(function(err, doc) {
+			assert.equal(err, null);
+			
+			if (doc != null) {
+				console.log("found matching doc.")
+				console.log(doc);
+			} else {
+				console.log(err);
+			}
+		}); 
+		*/
+
+		db.collection('seed_2_tests').replaceOne( 
+			{ "href" : ref },
+			doc,
+			{ upsert: true },
+			function(err, result) {
+				if(err){
+					reject(err)
+				} else {
+					console.log("resolved. doc inserted.");	
+					resolve(result)	
+				} //close if
+			} // close replace cb
+		); // close mongo.replace
 	}) // close promise
 }; // close upsert_promise
 
@@ -117,7 +149,7 @@ casper_promise()
 				MongoClient.connect(url, function(err, db) {
 					assert.equal(null, err);
 
-					var inner_promise_ray = outer_ray.map( (doc) => { return upsert_promise(db, doc.ref, doc)} )
+					var inner_promise_ray = outer_ray.map( (doc) => { return upsert_promise(db, doc.href, doc)} )
 					console.log("inner_promise_ray sample: ", inner_promise_ray[0])
 
 					Promise.all(inner_promise_ray)
