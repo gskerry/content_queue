@@ -161,7 +161,7 @@ casper_promise()
 				});
 
 				var storeStr = JSON.stringify(outer_ray)
-				fs.	appendFile('frontlines_ALL.json', storeStr, 'utf8', (err) => {
+				fs.	appendFile('scrapes/'+datepath+'/frontlines_ALL.json', storeStr, 'utf8', (err) => {
 					if (err) throw err;
 					console.log("data appended to file");
 				});
