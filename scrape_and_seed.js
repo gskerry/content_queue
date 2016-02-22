@@ -62,7 +62,15 @@ scrape_promise.then(function(complete_results){
 		});
 	});
 
+	var storeStr = JSON.stringify(complete_results)
+
+	fs.	appendFile('frontlines4.json', storeStr, 'utf8', (err) => {
+		if (err) throw err;
+		console.log("data appended to file");
+	});
+
 })
+
 
 /*var list = function () {
   return _.clone(results);
