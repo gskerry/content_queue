@@ -7,19 +7,25 @@ var assert = require('assert');
 var ObjectId = require('mongodb').ObjectID;
 var url = 'mongodb://localhost:27017/test';
 
-var upsertDoc = function(db, ref, doc, callback) {
-	db.collection('seed_2_tests').replaceOne( 
-		{ href: ref },
-		doc,
-		{ upsert: true },
-		function(err, result) {
-			assert.equal(err, null);
-			// console.log("Inserted document: ", result);
-			console.log("document Inserted.");
-			callback();
-		}
-	);
-};
+
+var upsert_promise = function(db, ref, doc) {
+
+	return new Promise(function(resolve, reject){
+		db.collection('seed_2_tests').replaceOne( 
+			{ href: ref },
+			doc,
+			{ upsert: true },
+			function(err, result) {
+				if(err){
+					reject(err)
+				} else {
+					console.log("resolved. doc inserted.");	
+					resolve(result)	
+				} //close if
+			} // close replace cb
+		); // close mongo.replace
+	}) // close promise
+}; // close upsert_promise
 
 var scrape_promise = new Promise(function(resolve, reject){
 
@@ -54,6 +60,7 @@ var scrape_promise = new Promise(function(resolve, reject){
 
 }); // close promise
 
+
 scrape_promise
 	.then(function(complete_results){
 
@@ -63,20 +70,17 @@ scrape_promise
 		MongoClient.connect(url, function(err, db) {
 			assert.equal(null, err);
 
-			console.log("upsert here. ")
+			var promise_ray = complete_results.map( (doc) => { return upsert_promise(db, doc.ref, doc)} )
+			console.log("promise_ray[0]: ", promise_ray[0])
 
-			complete_results.forEach((doc) => {
-				upsertDoc (db, doc.ref, doc, function(){
-					console.log("added doc.")
-				})
-			})
+			Promise.all(promise_ray)
+			.then(function(){
+					console.log("close db here...")
+					db.close();
+				}
+			)
+
 		});
-
-		// var storeStr = JSON.stringify(complete_results)
-		// fs.	appendFile('frontlines4.json', storeStr, 'utf8', (err) => {
-		// 	if (err) throw err;
-		// 	console.log("data appended to file");
-		// });
 
 	})
 	.then(function(){
@@ -84,8 +88,10 @@ scrape_promise
 		db.close();
 	})
 
+
 /*var list = function () {
   return _.clone(results);
 };
 
 module.exports = { list: list };*/
+
