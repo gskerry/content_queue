@@ -1,0 +1,11 @@
+{
+  "name": "frontline-offline",
+  "version": "1.0.0",
+  "description": "scraping and offline data store for PBS frontline episodes",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "gskerry",
+  "license": "ISC"
+}
