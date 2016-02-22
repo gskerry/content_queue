@@ -9,69 +9,64 @@ var url = 'mongodb://localhost:27017/test';
 
 var results = [];
 
-var insertDocument = function(db, ref, doc, callback) {
+var upsertDoc = function(db, ref, doc, callback) {
 	db.collection('seed_2_tests').replaceOne( 
 		{ href: ref },
 		doc,
+		{ upsert: true },
 		function(err, result) {
 			assert.equal(err, null);
-			// console.log("Inserted documents: ", results);
+			console.log("Inserted document: ", result);
 			callback();
 		}
 	);
 };
 
-var scrape_promise = new Promise(function(resolve, reject){
+MongoClient.connect(url, function(err, db) {
+	assert.equal(null, err);
+	console.log("mongo connected.");
+	var scrape_promise = new Promise(function(resolve, reject){
 
-	fs.readFile('index2.html', 'utf8', function(err, data){
-		if(err){ 
-			reject(err) 
-		} else {
+		fs.readFile('index2.html', 'utf8', function(err, data){
+			if(err){ 
+				reject(err); 
+			} else {
 
-			var $ = cheerio.load(data);
+				console.log("reading file...");
+				var $ = cheerio.load(data);
 
-			var howmanyhits = $('a.list__item').get().length
-			console.log("howmanyhits: ", howmanyhits);
+				var hits = $('a.list__item').get().length
+				console.log("hits: ", hits);
 
-			$('a.list__item').each(function(i, el){
-				tempObj = {}
-				tempObj.dex = i;
+				$('a.list__item').each(function(i, el){
+					console.log("entry # : ", i)
+					tempObj = {}
+					tempObj.dex = i;
+					tempObj.title = $(this).find($('.list__copy.list-hed')).text();
+					tempObj.date = $(this).find($('.list__copy.small-caps-copy')).text();
+					tempObj.href = $(this)[0].attribs.href;
+					tempObj.img = $(this).find($('.list__img')).children().attr('src')
+					// console.log("tempObj: ", tempObj)
+
+					console.log("upserting doc... (not really)");
+					upsertDoc(db, tempObj.href, tempObj, function() {
+						console.log("added doc.")
+					});
+
+				}); // close each
+
+				resolve();
 				
-				tempObj.title = $(this).find($('.list__copy.list-hed')).text();
-				tempObj.date = $(this).find($('.list__copy.small-caps-copy')).text();
-				tempObj.href = $(this)[0].attribs.href;
-				tempObj.img = $(this).find($('.list__img')).children().attr('src')
+			} // close IF
+		}); // close read
+	}); // close promise
 
-				results[i] = tempObj
-			});
-			resolve(results);
-			// console.log("results: ",results[0])
-
-		} // close IF
-	}); // close read
+	scrape_promise.then(function(){
+		console.log("closing db...");
+		// db.close();	
+	})
 
 });
-
-scrape_promise.then(function(complete_results){
-
-	console.log("complete_results: ", complete_results)
-	
-	MongoClient.connect(url, function(err, db) {
-		assert.equal(null, err);
-		insertDocument(db, complete_results, function() {
-			db.close();
-		});
-	});
-
-	var storeStr = JSON.stringify(complete_results)
-
-	fs.	appendFile('frontlines4.json', storeStr, 'utf8', (err) => {
-		if (err) throw err;
-		console.log("data appended to file");
-	});
-
-})
-
 
 /*var list = function () {
   return _.clone(results);
