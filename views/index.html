@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<h1>HELLO WORLD!</h1>
+
+{% for frontline in frontlines %}
+
+	<li>
+		<p>
+			
+			{{frontline.dex}}</br>
+			<a href="{{frontline.href}}">
+				<img src="{{frontline.img}}">
+			</a></br>
+			<!-- {{frontline.ID}}</br> -->
+			{{frontline.title}}</br>
+			{{frontline.date}}</br>
+			<!-- {{frontline.desc}}</br> -->
+			<!-- {{frontline.length}}</br> -->
+			<a href="{{frontline.href}}">{{frontline.href}}</a>
+			
+		</p>
+	</li>
+
+{% endfor %}
+
+{% endblock %}
+
