@@ -81,7 +81,7 @@ scrape_promise
 
 		var storeStr = JSON.stringify(complete_results)
 		
-		fs.	appendFile('frontlines4.json', storeStr, 'utf8', (err) => {
+		fs.appendFile('frontlines4.json', storeStr, 'utf8', (err) => {
 			if (err) throw err;
 			console.log("data appended to file");
 		});
