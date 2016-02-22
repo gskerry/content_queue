@@ -30,6 +30,7 @@ app.use(express.static(__dirname + '/public'));
 
 app.use( '/', function(req, res){
 	console.log("App active - testing.")
-	var list = mongo_api.list();
+	var list = mongo_api.list;
+	console.log("list hitting app layer: ",list)
 	res.render('index',{frontlines: list});
 });
