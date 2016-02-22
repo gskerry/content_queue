@@ -1,9 +1,24 @@
 var fs = require('fs');
 var request = require('request');
 var cheerio = require('cheerio');
-var _ = require('underscore');
+
+var MongoClient = require('mongodb').MongoClient;
+var assert = require('assert');
+var ObjectId = require('mongodb').ObjectID;
+var url = 'mongodb://localhost:27017/test';
 
 var results = [];
+
+var insertDocument = function(db, array, callback) {
+	db.collection('seed_2_tests').insertMany( 
+		array,
+		function(err, result) {
+			assert.equal(err, null);
+			console.log("Inserted documents: ", results);
+			callback();
+		}
+	);
+};
 
 var scrape_promise = new Promise(function(resolve, reject){
 
@@ -37,7 +52,16 @@ var scrape_promise = new Promise(function(resolve, reject){
 });
 
 scrape_promise.then(function(complete_results){
-	console.log("complete_results: ", complete_results)
+
+	// console.log("complete_results: ", complete_results)
+	
+	MongoClient.connect(url, function(err, db) {
+		assert.equal(null, err);
+		insertDocument(db, complete_results, function() {
+			db.close();
+		});
+	});
+
 })
 
 /*var list = function () {
